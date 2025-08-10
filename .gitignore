@@ -1,1 +1,7 @@
 badge-tag.zip
+archive.zip
+.DS_Store
+.gitignore
+Makefile
+package.sh
+README.md
