@@ -34,7 +34,7 @@ class App(badge.BaseApp):
                     for data in self.packet_data.values():
                         try:
                             if data[1] != "S":
-                                hider_rssis.append(((int(data[0]) + int(data[1]))//2))
+                                hider_rssis.append(((float(data[0]) + float(data[1]))//2))
                         except ValueError: 
                             badge.display.text(f"Failed to parse int", 10, 80, 0)
                             badge.display.text(f"RSSI1:{data[0]}, RSSI2:{data[1]}", 10, 100, 0)
