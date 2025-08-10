@@ -30,13 +30,15 @@ class App(badge.BaseApp):
                     self.packet_data[str(packet[0].source)] = [packet[1], packet[0].data.decode()]
                 
                 if self.role == "S": # if seeker
-                    hider_rssis = [data[0] for data in self.packet_data.values() if data[1] == "H"]
-                    if hider_rssis:
-                        nearest_hider_rssi = min(hider_rssis)
-                        badge.buzzer.tone((-nearest_hider_rssi if -nearest_hider_rssi > 0 else 2) * 30, 0.2)
-                        badge.display.text(f"Nearest hider RSSI: {nearest_hider_rssi}", 10, 60, 0)
-                    else:
-                        badge.display.text(f"No hiders found", 10, 60, 0)
+                    hider_rssis = [[data[0], data[1]] for data in self.packet_data.values() if data[1] != "S"]
+                    #if hider_rssis:
+                    #    nearest_hider_rssi = min(hider_rssis)
+                    #    badge.buzzer.tone((-nearest_hider_rssi if -nearest_hider_rssi > 0 else 2) * 30, 0.2)
+                    #    badge.display.text(f"Nearest hider RSSI: {nearest_hider_rssi}", 10, 60, 0)
+                    #else:
+                    #    badge.display.text(f"No hiders found", 10, 60, 0)
+                    for hider in hider_rssis:
+                        badge.display.text(f"RSSI1: {hider[0]}, RSSI2: {hider[1]}", 10, 60 + 10 * hider_rssis.index(hider), 0)
                 elif self.role == "H": # if hider
                     # Ensure the packet content is "S"
                     if self.packets and self.packets[0][0].data.decode() == "S":
