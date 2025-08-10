@@ -30,7 +30,14 @@ class App(badge.BaseApp):
                     self.packet_data[str(packet[0].source)] = [packet[1], packet[0].data.decode()]
                 
                 if self.role == "S": # if seeker
-                    hider_rssis = [((int(data[0]) + int(data[1]))//2) for data in self.packet_data.values() if data[1] != "S"]
+                    hider_rssis = []
+                    for data in self.packet_data.values():
+                        try:
+                            if data[1] != "S":
+                                hider_rssis.append(((int(data[0]) + int(data[1]))//2))
+                        except ValueError: 
+                            badge.display.text(f"Failed to parse int", 10, 80, 0)
+                            badge.display.text(f"RSSI1:{data[0]}, RSSI2:{data[1]}", 10, 100, 0)
                     if hider_rssis:
                         nearest_hider_rssi = min(hider_rssis)
                         badge.buzzer.tone((-nearest_hider_rssi if -nearest_hider_rssi > 0 else 2) * 30, 0.2)
