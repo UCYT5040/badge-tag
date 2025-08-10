@@ -22,6 +22,7 @@ class App(badge.BaseApp):
         if self.role:
             if badge.input.get_button(badge.input.Buttons.SW11):
                 badge.radio.send_packet(dest=0xFFFF, data=self.role.encode())
+                badge.buzzer.tone(600, 0.5)
 
             if len(self.packets):
                 badge.display.fill(1)
@@ -57,7 +58,7 @@ class App(badge.BaseApp):
                 print(self.packet_data)
                 self.packets = []
 
-            utime.sleep_ms(2500)
+            utime.sleep_ms(50)
         else:
             if badge.input.get_button(badge.input.Buttons.SW13):
                 self.role = "H"
