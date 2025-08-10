@@ -1,0 +1,6 @@
+{
+    "displayName": "Badge Tag",
+    "logoPath": "badge-tag.pbm",
+    "permissions": ["radio:write"],
+    "appNumber": 13
+}
