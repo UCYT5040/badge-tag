@@ -20,8 +20,8 @@ class App(badge.BaseApp):
 
     def loop(self):
         if self.role:
-            # if badge.input.get_button(badge.input.Buttons.SW11):
-            badge.radio.send_packet(dest=0xFFFF, data=self.role.encode())
+            if badge.input.get_button(badge.input.Buttons.SW11):
+                badge.radio.send_packet(dest=0xFFFF, data=self.role.encode())
 
             if len(self.packets):
                 badge.display.fill(1)
@@ -37,6 +37,11 @@ class App(badge.BaseApp):
                         badge.display.text(f"Nearest hider RSSI: {nearest_hider_rssi}", 10, 60, 0)
                     else:
                         badge.display.text(f"No hiders found", 10, 60, 0)
+                elif self.role == "H": # if hider
+                    # Ensure the packet content is "S"
+                    if self.packets and self.packets[0][0].data.decode() == "S":
+                        badge.radio.send_packet(dest=0xFFFF, data=str(sx.getRSSI()).encode())
+
 
                 badge.display.text(f"Found {str(len(self.packets))} player(s)", 10, 180, 0)
                 badge.display.show()
