@@ -1,6 +1,11 @@
 import badge
 import utime
 
+try:
+    import gc
+except ImportError:
+    gc = None
+
 from internal_os.hardware.radio import sx
 
 class App(badge.BaseApp):
@@ -8,6 +13,8 @@ class App(badge.BaseApp):
         self.packets = []
         self.packet_data = {}
         self.role = None
+        
+        self._last_gc_ms = utime.ticks_ms()
 
     def on_open(self) -> None:
         badge.display.fill(1)
@@ -20,7 +27,7 @@ class App(badge.BaseApp):
 
     def loop(self):
         if self.role:
-            if badge.input.get_button(badge.input.Buttons.SW11):
+            if badge.input.get_button(badge.input.Buttons.SW11) and self.role == "S":
                 badge.radio.send_packet(dest=0xFFFF, data=self.role.encode())
                 badge.buzzer.tone(600, 0.5)
 
@@ -49,14 +56,20 @@ class App(badge.BaseApp):
                     #    badge.display.text(f"RSSI1: {hider[0]}, RSSI2: {hider[1]}", 10, 60 + 10 * hider_rssis.index(hider), 0)
                 elif self.role == "H": # if hider
                     # Ensure the packet content is "S"
-                    if self.packets and self.packets[0][0].data.decode() == "S":
-                        badge.radio.send_packet(dest=0xFFFF, data=str(sx.getRSSI()).encode())
+                    for packet in self.packets:
+                        if packet[0].data.decode() == "S":
+                    #if self.packets and self.packets[0][0].data.decode() == "S":
+                            badge.radio.send_packet(dest=0xFFFF, data=str(sx.getRSSI()).encode())
+                            if -sx.getRSSI() < 10:
+                                self.role = "S"
 
 
                 badge.display.text(f"Found {str(len(self.packets))} player(s)", 10, 180, 0)
                 badge.display.show()
                 print(self.packet_data)
                 self.packets = []
+                if gc:
+                    gc.collect()
 
             utime.sleep_ms(50)
         else:
@@ -69,3 +82,8 @@ class App(badge.BaseApp):
                 badge.display.fill(1)
                 badge.display.show()
             utime.sleep_ms(50)
+
+        # periodic gc
+        if gc and utime.ticks_diff(utime.ticks_ms(), self._last_gc_ms) > 5000:
+            gc.collect()
+            self._last_gc_ms = utime.ticks_ms()
